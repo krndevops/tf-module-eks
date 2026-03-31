@@ -80,4 +80,8 @@ resource "aws_eks_node_group" "main" {
     min_size     = each.value["size"]
 
   }
+  tags = {
+    name = "${local.name}-${each.key}-ng"
+  }
+
 }
