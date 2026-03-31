@@ -1,3 +1,11 @@
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "6.17.0"
+    }
+  }
+}
 resource "aws_iam_role" "main" {
   name = "${local.name}-role"
   assume_role_policy = jsonencode({
@@ -65,6 +73,18 @@ resource "aws_eks_cluster" "main" {
 
 }
 
+resource "aws_launch_template" "main" {
+  for_each        = var.node_groups
+  name_prefix     = "${local.name}-${each.key}-ng-asg"
+
+  tag_specifications {
+    resource_type = "instance"
+    tags = {
+      Name = "${local.name}-${each.key}-ng-asg"
+    }
+  }
+}
+
 resource "aws_eks_node_group" "main" {
   for_each        = var.node_groups
   cluster_name    = aws_eks_cluster.main.name
@@ -73,6 +93,11 @@ resource "aws_eks_node_group" "main" {
   subnet_ids      = var.subnet_ids
   instance_types  = each.value["instance_types"]
   capacity_type   = each.value["capacity_type"]
+
+  launch_template {
+    version = "$Latest"
+    id      = lookup(lookup(aws_launch_template.main, each.key, null), "id", null)
+  }
 
   scaling_config {
     desired_size = each.value["size"]
