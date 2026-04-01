@@ -48,6 +48,30 @@ resource "aws_iam_role" "node" {
   })
 }
 
+resource "aws_iam_policy" "node-extra-policy" {
+  name        = "${local.name}-node-role-extra-policy"
+  path        = "/"
+  description = "${local.name}-node-role-extra-policy"
+
+  policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Sid" : "VisualEditor0",
+        "Effect" : "Allow",
+        "Action" : [
+          "ssm:DescribeParameters",
+          "ssm:GetParameterHistory",
+          "ssm:GetParametersByPath",
+          "ssm:GetParameters",
+          "ssm:GetParameter"
+        ],
+        "Resource" : "*"
+      }
+    ]
+  })
+}
+
 resource "aws_iam_role_policy_attachment" "main-AmazonEKSWorkerNodePolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
   role       = aws_iam_role.node.name
@@ -60,6 +84,11 @@ resource "aws_iam_role_policy_attachment" "main-AmazonEKS_CNI_Policy" {
 
 resource "aws_iam_role_policy_attachment" "main-AmazonEC2ContainerRegistryReadOnly" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+  role       = aws_iam_role.node.name
+}
+
+resource "aws_iam_role_policy_attachment" "extra-policy-attach" {
+  policy_arn = aws_iam_policy.node-extra-policy.arn
   role       = aws_iam_role.node.name
 }
 
