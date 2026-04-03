@@ -64,7 +64,8 @@ resource "aws_iam_policy" "node-extra-policy" {
           "ssm:GetParameterHistory",
           "ssm:GetParametersByPath",
           "ssm:GetParameters",
-          "ssm:GetParameter"
+          "ssm:GetParameter",
+          "kms:Decrypt"
         ],
         "Resource" : "*"
       }
