@@ -65,7 +65,8 @@ resource "aws_iam_policy" "node-extra-policy" {
           "ssm:GetParametersByPath",
           "ssm:GetParameters",
           "ssm:GetParameter",
-          "kms:Decrypt"
+          "kms:Decrypt",
+          "route53:*"
         ],
         "Resource" : "*"
       }
