@@ -98,10 +98,10 @@ resource "aws_iam_role_policy_attachment" "main-AmazonEC2ContainerRegistryReadOn
   role       = aws_iam_role.node.name
 }
 
-resource "aws_iam_role_policy_attachment" "extra-policy-attach" {
-  policy_arn = aws_iam_policy.node-extra-policy.arn
-  role       = aws_iam_role.node.name
-}
+# resource "aws_iam_role_policy_attachment" "extra-policy-attach" {
+#   policy_arn = aws_iam_policy.node-extra-policy.arn
+#   role       = aws_iam_role.node.name
+# }
 
 resource "aws_eks_cluster" "main" {
   name     = "${var.env}-eks"
