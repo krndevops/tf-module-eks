@@ -88,7 +88,7 @@ resource "aws_iam_role" "external_dns" {
 }
 
 
-resource "aws_iam_role" "cluster-autoscaler" {
+resource "aws_iam_role" "cluster_autoscaler" {
   name = "${local.name}-pod-role-for-cluster-autoscaler"
 
   assume_role_policy = jsonencode({
@@ -105,7 +105,7 @@ resource "aws_iam_role" "cluster-autoscaler" {
         Condition = {
           StringEquals = {
             "oidc.eks.us-east-1.amazonaws.com/id/${local.cluster_issuer_id}:aud" = "sts.amazonaws.com",
-            "oidc.eks.us-east-1.amazonaws.com/id/${local.cluster_issuer_id}:sub" = "system:serviceaccount:default:node-autoscaler-aws-cluster-autoscaler"
+            "oidc.eks.us-east-1.amazonaws.com/id/${local.cluster_issuer_id}:sub" = "system:serviceaccount:default:my-release-aws-cluster-autoscaler"
           }
         }
       }
@@ -144,7 +144,7 @@ variable "components" {
   default = ["frontend", "cart", "catalogue", "user", "shipping", "payment"]
 }
 
-resource "aws_iam_role" "app-ssm" {
+resource "aws_iam_role" "app_ssm" {
   count = length(var.components)
   name = "${local.name}-pod-role-for-${var.components[count.index]}-ssm"
 
