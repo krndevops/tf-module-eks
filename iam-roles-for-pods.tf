@@ -46,22 +46,17 @@ resource "aws_iam_role" "external_dns" {
   name = "${local.name}-pod-role-for-external-dns"
 
   assume_role_policy = jsonencode({
-    Version = "2012-10-17",
+    Version = "2012-10-17"
     Statement = [
       {
-        Effect = "Allow",
-        Action = "sts:AssumeRoleWithWebIdentity",
-
+        Effect = "Allow"
         Principal = {
-          Federated = "arn:aws:iam::367241114876:oidc-provider/oidc.eks.us-east-1.amazonaws.com/id/${local.cluster_issuer_id}"
-        },
-
-        Condition = {
-          StringEquals = {
-            "oidc.eks.us-east-1.amazonaws.com/id/${local.cluster_issuer_id}:aud" = "sts.amazonaws.com",
-            "oidc.eks.us-east-1.amazonaws.com/id/${local.cluster_issuer_id}:sub" = "system:serviceaccount:default:external-dns"
-          }
+          Service = "pods.eks.amazonaws.com"
         }
+        Action = [
+          "sts:AssumeRole",
+          "sts:TagSession"
+        ]
       }
     ]
   })
@@ -92,22 +87,17 @@ resource "aws_iam_role" "cluster_autoscaler" {
   name = "${local.name}-pod-role-for-cluster-autoscaler"
 
   assume_role_policy = jsonencode({
-    Version = "2012-10-17",
+    Version = "2012-10-17"
     Statement = [
       {
-        Effect = "Allow",
-        Action = "sts:AssumeRoleWithWebIdentity",
-
+        Effect = "Allow"
         Principal = {
-          Federated = "arn:aws:iam::367241114876:oidc-provider/oidc.eks.us-east-1.amazonaws.com/id/${local.cluster_issuer_id}"
-        },
-
-        Condition = {
-          StringEquals = {
-            "oidc.eks.us-east-1.amazonaws.com/id/${local.cluster_issuer_id}:aud" = "sts.amazonaws.com",
-            "oidc.eks.us-east-1.amazonaws.com/id/${local.cluster_issuer_id}:sub" = "system:serviceaccount:default:my-release-aws-cluster-autoscaler"
-          }
+          Service = "pods.eks.amazonaws.com"
         }
+        Action = [
+          "sts:AssumeRole",
+          "sts:TagSession"
+        ]
       }
     ]
   })
@@ -149,22 +139,17 @@ resource "aws_iam_role" "app_ssm" {
   name = "${local.name}-pod-role-for-${var.components[count.index]}-ssm"
 
   assume_role_policy = jsonencode({
-    Version = "2012-10-17",
+    Version = "2012-10-17"
     Statement = [
       {
-        Effect = "Allow",
-        Action = "sts:AssumeRoleWithWebIdentity",
-
+        Effect = "Allow"
         Principal = {
-          Federated = "arn:aws:iam::367241114876:oidc-provider/oidc.eks.us-east-1.amazonaws.com/id/${local.cluster_issuer_id}"
-        },
-
-        Condition = {
-          StringEquals = {
-            "oidc.eks.us-east-1.amazonaws.com/id/${local.cluster_issuer_id}:aud" = "sts.amazonaws.com",
-            "oidc.eks.us-east-1.amazonaws.com/id/${local.cluster_issuer_id}:sub" = "system:serviceaccount:default:${var.components[count.index]}"
-          }
+          Service = "pods.eks.amazonaws.com"
         }
+        Action = [
+          "sts:AssumeRole",
+          "sts:TagSession"
+        ]
       }
     ]
   })
