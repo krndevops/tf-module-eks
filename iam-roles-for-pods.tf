@@ -40,11 +40,62 @@ resource "aws_eks_pod_identity_association" "main" {
   role_arn        = aws_iam_role.pod.arn
 }
 
+resource "aws_iam_role" "cluster_autoscaler" {
+  name = "${local.name}-pod-role-for-cluster-autoscaler"
 
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "sts:AssumeRole",
+          "sts:TagSession"
+        ]
+        Effect = "Allow"
+        Principal = {
+          Service = "pods.eks.amazonaws.com"
+        }
+      },
+    ]
+  })
+
+  inline_policy {
+    name = "cluster_autoscaler"
+
+    policy = jsonencode({
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Action = [
+            "autoscaling:DescribeAutoScalingGroups",
+            "autoscaling:DescribeAutoScalingInstances",
+            "autoscaling:DescribeLaunchConfigurations",
+            "autoscaling:DescribeScalingActivities",
+            "ec2:DescribeImages",
+            "ec2:DescribeInstanceTypes",
+            "ec2:DescribeLaunchTemplateVersions",
+            "ec2:GetInstanceTypesFromInstanceRequirements",
+            "eks:DescribeNodegroup",
+            "autoscaling:SetDesiredCapacity",
+            "autoscaling:TerminateInstanceInAutoScalingGroup"
+          ]
+          Effect   = "Allow"
+          Resource = "*"
+        },
+      ]
+    })
+  }
+
+}
+
+resource "aws_iam_role_policy_attachment" "cluster_access" {
+  role       = aws_iam_role.cluster_autoscaler.name
+  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
+}
 
 resource "aws_eks_pod_identity_association" "cluster_autoscaler" {
   cluster_name    = aws_eks_cluster.main.name
   namespace       = "kube-system"
   service_account = "my-release-aws-cluster-autoscaler"
-  role_arn        = aws_iam_role.pod.arn
+  role_arn        = aws_iam_role.cluster_autoscaler.arn
 }
