@@ -48,40 +48,40 @@ resource "aws_iam_role" "node" {
   })
 }
 
-# resource "aws_iam_policy" "node-extra-policy" {
-#   name        = "${local.name}-node-role-extra-policy"
-#   path        = "/"
-#   description = "${local.name}-node-role-extra-policy"
-#
-#   policy = jsonencode({
-#     "Version" : "2012-10-17",
-#     "Statement" : [
-#       {
-#         "Sid" : "VisualEditor0",
-#         "Effect" : "Allow",
-#         "Action" : [
-#           "ssm:DescribeParameters",
-#           "ssm:GetParameterHistory",
-#           "ssm:GetParametersByPath",
-#           "ssm:GetParameters",
-#           "ssm:GetParameter",
-#           "kms:Decrypt",
-#           "route53:*",
-#           "autoscaling:DescribeAutoScalingGroups",
-#           "autoscaling:DescribeAutoScalingInstances",
-#           "autoscaling:DescribeLaunchConfigurations",
-#           "autoscaling:DescribeScalingActivities",
-#           "ec2:DescribeImages",
-#           "ec2:DescribeInstanceTypes",
-#           "ec2:DescribeLaunchTemplateVersions",
-#           "ec2:GetInstanceTypesFromInstanceRequirements",
-#           "eks:DescribeNodegroup"
-#         ],
-#         "Resource" : "*"
-#       }
-#     ]
-#   })
-# }
+resource "aws_iam_policy" "node-extra-policy" {
+  name        = "${local.name}-node-role-extra-policy"
+  path        = "/"
+  description = "${local.name}-node-role-extra-policy"
+
+  policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Sid" : "VisualEditor0",
+        "Effect" : "Allow",
+        "Action" : [
+          "ssm:DescribeParameters",
+          "ssm:GetParameterHistory",
+          "ssm:GetParametersByPath",
+          "ssm:GetParameters",
+          "ssm:GetParameter",
+          "kms:Decrypt",
+          "route53:*",
+          "autoscaling:DescribeAutoScalingGroups",
+          "autoscaling:DescribeAutoScalingInstances",
+          "autoscaling:DescribeLaunchConfigurations",
+          "autoscaling:DescribeScalingActivities",
+          "ec2:DescribeImages",
+          "ec2:DescribeInstanceTypes",
+          "ec2:DescribeLaunchTemplateVersions",
+          "ec2:GetInstanceTypesFromInstanceRequirements",
+          "eks:DescribeNodegroup"
+        ],
+        "Resource" : "*"
+      }
+    ]
+  })
+}
 
 resource "aws_iam_role_policy_attachment" "main-AmazonEKSWorkerNodePolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
@@ -98,10 +98,10 @@ resource "aws_iam_role_policy_attachment" "main-AmazonEC2ContainerRegistryReadOn
   role       = aws_iam_role.node.name
 }
 
-# resource "aws_iam_role_policy_attachment" "extra-policy-attach" {
-#   policy_arn = aws_iam_policy.node-extra-policy.arn
-#   role       = aws_iam_role.node.name
-# }
+resource "aws_iam_role_policy_attachment" "extra-policy-attach" {
+  policy_arn = aws_iam_policy.node-extra-policy.arn
+  role       = aws_iam_role.node.name
+}
 
 resource "aws_eks_cluster" "main" {
   name     = "${var.env}-eks"
@@ -111,10 +111,6 @@ resource "aws_eks_cluster" "main" {
     subnet_ids = var.subnet_ids
   }
 
-}
-
-data "aws_eks_cluster" "main" {
-  name = aws_eks_cluster.main.name
 }
 
 resource "aws_launch_template" "main" {
@@ -155,9 +151,3 @@ resource "aws_eks_node_group" "main" {
 
 }
 
-resource "aws_iam_openid_connect_provider" "default" {
-
-  url             = local.issuer
-  client_id_list  = [ "sts.amazonaws.com" ]
-  thumbprint_list = ["06b25927c42a721631c1efd9431e648fa62e1e39"]
-}
