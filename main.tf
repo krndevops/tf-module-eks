@@ -113,6 +113,10 @@ resource "aws_eks_cluster" "main" {
 
 }
 
+data "aws_eks_cluster" "main" {
+  name = aws_eks_cluster.main.name
+}
+
 resource "aws_launch_template" "main" {
   for_each        = var.node_groups
   name_prefix     = "${local.name}-${each.key}-ng"
@@ -153,7 +157,7 @@ resource "aws_eks_node_group" "main" {
 
 resource "aws_iam_openid_connect_provider" "default" {
 
-  url             = local.issuer
+  url             = data.aws_eks_cluster.main.identity[0].oidc.issuer
   client_id_list  = [ "sts.amazonaws.com" ]
   thumbprint_list = ["06b25927c42a721631c1efd9431e648fa62e1e39"]
 }
