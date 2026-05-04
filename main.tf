@@ -154,6 +154,8 @@ resource "aws_eks_node_group" "main" {
 
   tags = {
     name = "${local.name}-${each.key}-ng"
+    "k8s.io/cluster-autoscaler/enabled" = "true"
+    "k8s.io/cluster-autoscaler/${aws_eks_cluster.main.name}" = "owned"
   }
 }
 
