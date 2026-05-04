@@ -137,25 +137,24 @@ resource "aws_eks_node_group" "main" {
   instance_types  = each.value["instance_types"]
   capacity_type   = each.value["capacity_type"]
 
+  depends_on = [
+    aws_eks_cluster.main
+  ]
+
   launch_template {
     version = "$Latest"
     id      = lookup(lookup(aws_launch_template.main, each.key, null), "id", null)
-
-    depends_on = [
-      aws_eks_cluster.main
-    ]
   }
 
   scaling_config {
     desired_size = each.value["size"]
     max_size     = each.value["size"] + 5
     min_size     = each.value["size"]
-
   }
+
   tags = {
     name = "${local.name}-${each.key}-ng"
   }
-
 }
 
 resource "aws_eks_access_policy_association" "workstation" {
