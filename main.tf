@@ -107,12 +107,15 @@ resource "aws_eks_cluster" "main" {
   name     = "${var.env}-eks"
   role_arn = aws_iam_role.main.arn
 
+  access_config {
+    authentication_mode                         = "API_AND_CONFIG_MAP"
+    bootstrap_cluster_creator_admin_permissions = true
+  }
+
   vpc_config {
     subnet_ids = var.subnet_ids
   }
-
 }
-
 resource "aws_launch_template" "main" {
   for_each        = var.node_groups
   name_prefix     = "${local.name}-${each.key}-ng"
@@ -137,6 +140,10 @@ resource "aws_eks_node_group" "main" {
   launch_template {
     version = "$Latest"
     id      = lookup(lookup(aws_launch_template.main, each.key, null), "id", null)
+
+    depends_on = [
+      aws_eks_cluster.main
+    ]
   }
 
   scaling_config {
