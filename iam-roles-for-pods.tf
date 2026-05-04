@@ -105,7 +105,7 @@ resource "aws_eks_pod_identity_association" "cluster_autoscaler" {
 
 resource "helm_release" "cluster_autoscaler" {
   name       = "cluster-autoscaler"
-  namespace  = "kube-system"
+  namespace  = "default"
 
   repository = "https://kubernetes.github.io/autoscaler"
   chart      = "cluster-autoscaler"
