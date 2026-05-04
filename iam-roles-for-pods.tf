@@ -71,6 +71,7 @@ resource "aws_iam_role" "cluster_autoscaler" {
             "autoscaling:DescribeAutoScalingInstances",
             "autoscaling:DescribeLaunchConfigurations",
             "autoscaling:DescribeScalingActivities",
+            "autoscaling:DescribeTags",
             "ec2:DescribeImages",
             "ec2:DescribeInstanceTypes",
             "ec2:DescribeLaunchTemplateVersions",
@@ -95,9 +96,13 @@ resource "aws_iam_role_policy_attachment" "cluster_access" {
 
 resource "aws_eks_pod_identity_association" "cluster_autoscaler" {
   cluster_name    = aws_eks_cluster.main.name
+
   namespace       = "default"
-  service_account = "my-release-aws-cluster-autoscaler"
+
+  service_account = "cluster-autoscaler"
+
   role_arn        = aws_iam_role.cluster_autoscaler.arn
+
   depends_on = [
     aws_eks_addon.pod_identity
   ]
