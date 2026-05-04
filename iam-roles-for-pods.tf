@@ -105,7 +105,7 @@ resource "aws_eks_pod_identity_association" "cluster_autoscaler" {
 
 resource "helm_release" "cluster_autoscaler" {
   name       = "cluster-autoscaler"
-  namespace  = "default"
+  namespace  = "kube-system"
 
   repository = "https://kubernetes.github.io/autoscaler"
   chart      = "cluster-autoscaler"
@@ -114,38 +114,34 @@ resource "helm_release" "cluster_autoscaler" {
     aws_eks_pod_identity_association.cluster_autoscaler
   ]
 
-  set {
-    name  = "autoDiscovery.clusterName"
-    value = aws_eks_cluster.main.name
-  }
-
-  set {
-    name  = "awsRegion"
-    value = "us-east-1"
-  }
-
-  set {
-    name  = "rbac.serviceAccount.create"
-    value = "true"
-  }
-
-  set {
-    name  = "rbac.serviceAccount.name"
-    value = "cluster-autoscaler"
-  }
-
-  set {
-    name  = "extraArgs.balance-similar-node-groups"
-    value = "true"
-  }
-
-  set {
-    name  = "extraArgs.skip-nodes-with-system-pods"
-    value = "false"
-  }
-
-  set {
-    name  = "extraArgs.expander"
-    value = "least-waste"
-  }
+  set = [
+    {
+      name  = "autoDiscovery.clusterName"
+      value = aws_eks_cluster.main.name
+    },
+    {
+      name  = "awsRegion"
+      value = "us-east-1"
+    },
+    {
+      name  = "rbac.serviceAccount.create"
+      value = "true"
+    },
+    {
+      name  = "rbac.serviceAccount.name"
+      value = "cluster-autoscaler"
+    },
+    {
+      name  = "extraArgs.balance-similar-node-groups"
+      value = "true"
+    },
+    {
+      name  = "extraArgs.skip-nodes-with-system-pods"
+      value = "false"
+    },
+    {
+      name  = "extraArgs.expander"
+      value = "least-waste"
+    }
+  ]
 }
