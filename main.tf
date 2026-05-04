@@ -128,6 +128,44 @@ resource "aws_launch_template" "main" {
   }
 }
 
+data "aws_eks_cluster" "main" {
+  name = aws_eks_cluster.main.name
+
+  depends_on = [
+    aws_eks_cluster.main
+  ]
+}
+
+data "aws_eks_cluster_auth" "main" {
+  name = aws_eks_cluster.main.name
+
+  depends_on = [
+    aws_eks_cluster.main
+  ]
+}
+
+#################################################
+# KUBERNETES PROVIDER
+#################################################
+
+provider "kubernetes" {
+  host                   = data.aws_eks_cluster.main.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.main.certificate_authority[0].data)
+  token                  = data.aws_eks_cluster_auth.main.token
+}
+
+#################################################
+# HELM PROVIDER
+#################################################
+
+provider "helm" {
+  kubernetes = {
+    host                   = data.aws_eks_cluster.main.endpoint
+    cluster_ca_certificate = base64decode(data.aws_eks_cluster.main.certificate_authority[0].data)
+    token                  = data.aws_eks_cluster_auth.main.token
+  }
+}
+
 resource "aws_eks_node_group" "main" {
   for_each        = var.node_groups
   cluster_name    = aws_eks_cluster.main.name
@@ -153,7 +191,7 @@ resource "aws_eks_node_group" "main" {
   }
 
   tags = {
-    name = "${local.name}-${each.key}-ng"
+     Name = "${local.name}-${each.key}-ng"
     "k8s.io/cluster-autoscaler/enabled" = "true"
     "k8s.io/cluster-autoscaler/${aws_eks_cluster.main.name}" = "owned"
   }
