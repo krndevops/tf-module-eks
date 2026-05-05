@@ -38,6 +38,9 @@ resource "aws_eks_pod_identity_association" "main" {
   namespace       = "default"
   service_account = each.value
   role_arn        = aws_iam_role.pod.arn
+  depends_on = [
+    aws_eks_addon.pod_identity
+  ]
 }
 
 resource "aws_iam_role" "cluster_autoscaler" {
