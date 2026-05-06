@@ -142,7 +142,10 @@ resource "aws_eks_node_group" "main" {
   capacity_type   = each.value["capacity_type"]
 
   depends_on = [
-    aws_eks_cluster.main
+    aws_eks_cluster.main,
+    aws_iam_role_policy_attachment.main-AmazonEKSWorkerNodePolicy,
+    aws_iam_role_policy_attachment.main-AmazonEKS_CNI_Policy,
+    aws_iam_role_policy_attachment.main-AmazonEC2ContainerRegistryReadOnly
   ]
 
   launch_template {
@@ -156,6 +159,10 @@ resource "aws_eks_node_group" "main" {
     min_size     = each.value["size"]
   }
 
+  update_config {
+    max_unavailable = 1
+  }
+  
   tags = {
      Name = "${local.name}-${each.key}-ng"
     "k8s.io/cluster-autoscaler/enabled" = "true"
