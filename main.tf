@@ -104,8 +104,14 @@ resource "aws_iam_role_policy_attachment" "extra-policy-attach" {
 }
 
 resource "aws_eks_cluster" "main" {
+
   name     = "${var.env}-eks"
   role_arn = aws_iam_role.main.arn
+
+  depends_on = [
+    aws_iam_role_policy_attachment.main-AmazonEKSClusterPolicy,
+    aws_iam_role_policy_attachment.main-eks_vpc_resource_controller
+  ]
 
   access_config {
     authentication_mode                         = "API_AND_CONFIG_MAP"
@@ -113,7 +119,9 @@ resource "aws_eks_cluster" "main" {
   }
 
   vpc_config {
-    subnet_ids = var.subnet_ids
+    subnet_ids              = var.subnet_ids
+    endpoint_private_access = false
+    endpoint_public_access  = true
   }
 }
 resource "aws_launch_template" "main" {
@@ -162,7 +170,7 @@ resource "aws_eks_node_group" "main" {
   update_config {
     max_unavailable = 1
   }
-  
+
   tags = {
      Name = "${local.name}-${each.key}-ng"
     "k8s.io/cluster-autoscaler/enabled" = "true"
@@ -178,4 +186,21 @@ resource "aws_eks_access_policy_association" "workstation" {
   access_scope {
     type = "cluster"
   }
+}
+
+
+
+resource "aws_eks_addon" "coredns" {
+  cluster_name = aws_eks_cluster.main.name
+  addon_name   = "coredns"
+}
+
+resource "aws_eks_addon" "kube_proxy" {
+  cluster_name = aws_eks_cluster.main.name
+  addon_name   = "kube-proxy"
+}
+
+resource "aws_eks_addon" "vpc_cni" {
+  cluster_name = aws_eks_cluster.main.name
+  addon_name   = "vpc-cni"
 }
